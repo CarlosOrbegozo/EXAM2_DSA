@@ -1,14 +1,18 @@
 package edu.upc.eetac.dsa;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -18,20 +22,40 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    DibaAPI dibaAPI;
-    private RecyclerView list;
-    Callback<Elements> getAllApi = new Callback<Elements>(){
+    API dibaAPI;
+    private RecyclerViewAdapter recycler;
+    private RecyclerView recyclerView;
+
+    TextView textViewIne;
+    TextView textViewNameTown;
+    ImageView ivImageFromUrl;
+
+    private String token;
+
+    ProgressDialog progressDialog;
+    Callback<Cities> getAll = new Callback<Cities>(){
 
         @Override
-        public void onResponse(Call<Elements> call, Response<Elements> response) {
+        public void onResponse(Call<Cities> call, Response<Cities> response) {
             if (response.isSuccessful()) {
-                Elements data = response.body();
-                list.setAdapter(new RecyclerViewAdapter(data));
+                Cities cities = response.body();
+
+                List<Element> listElements = cities.getElements();
+
+                for(Element e : listElements){
+                    Log.i("Nom municipi: " + e.getMunicipiNom(), response.message());
+                }
+
+                if(listElements.size() != 0){
+                    recycler.addElements(listElements);
+                }
+
+                progressDialog.hide();
             }
         }
 
         @Override
-        public void onFailure(Call<Elements> call, Throwable t) {
+        public void onFailure(Call<Cities> call, Throwable t) {
 
         }
     };
@@ -41,21 +65,55 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        list = (RecyclerView) findViewById(R.id.recyclerView);
-        list.setHasFixedSize(true);
-        list.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recycler = new RecyclerViewAdapter(this);
+        recyclerView.setAdapter(recycler);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //TextViews where we show the Ine, the name of the local council and the image of the local council
+        textViewIne = findViewById(R.id.numeroIne);
+        textViewNameTown = findViewById(R.id.nomMunicipi);
+        ivImageFromUrl = findViewById(R.id.escutMunicipi);
+
+        // Get the Intent that started this activity
+        Intent intent = getIntent();
+
+        //Progress loading
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Loading...");
+        progressDialog.setMessage("Waiting for the server");
+        progressDialog.setCancelable(false);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.show();
+
         createDibaAPI();
-        dibaAPI.getAllApi().enqueue(getAllApi);
+        dibaAPI.getCities().enqueue(getAll);
     }
 
     private void createDibaAPI() {
         Gson gson = new GsonBuilder().create();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(DibaAPI.BASE_URL)
+                .baseUrl(API.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        dibaAPI = retrofit.create(DibaAPI.class);
+        dibaAPI = retrofit.create(API.class);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (token != null) {
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == 1) {
+            token = data.getStringExtra("token");
+        }
     }
 }
