@@ -22,17 +22,17 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    API dibaAPI;
-    private RecyclerViewAdapter recycler;
-    private RecyclerView recyclerView;
-
-    TextView textViewIne;
-    TextView textViewNameTown;
-    ImageView ivImageFromUrl;
 
     private String token;
+    private API dibaAPI;
 
+    private RecyclerViewAdapter recycler;
+    private RecyclerView recyclerView;
+    TextView ineText;
+    TextView nameTownText;
+    ImageView image;
     ProgressDialog progressDialog;
+
     Callback<Cities> getAll = new Callback<Cities>(){
 
         @Override
@@ -45,11 +45,9 @@ public class MainActivity extends AppCompatActivity {
                 for(Element e : listElements){
                     Log.i("Nom municipi: " + e.getMunicipiNom(), response.message());
                 }
-
                 if(listElements.size() != 0){
                     recycler.addElements(listElements);
                 }
-
                 progressDialog.hide();
             }
         }
@@ -65,20 +63,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         recycler = new RecyclerViewAdapter(this);
         recyclerView.setAdapter(recycler);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        //TextViews where we show the Ine, the name of the local council and the image of the local council
-        textViewIne = findViewById(R.id.numeroIne);
-        textViewNameTown = findViewById(R.id.nomMunicipi);
-        ivImageFromUrl = findViewById(R.id.escutMunicipi);
-
-        // Get the Intent that started this activity
+        ineText = findViewById(R.id.ineName);
+        nameTownText = findViewById(R.id.municipiName);
+        image = findViewById(R.id.escutMunicipi);
+        //
         Intent intent = getIntent();
 
         //Progress loading

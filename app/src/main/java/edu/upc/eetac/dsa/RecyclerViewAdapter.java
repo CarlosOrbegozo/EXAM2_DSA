@@ -15,18 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-
-    //public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
-
     private Context context;
     private List<Element> data;
 
-    public void addElements(List<Element> elementList) {
-        data.addAll(elementList);
-        notifyDataSetChanged();
+    public void addElements(List<Element> listElements) {
+        data.addAll(listElements);
     }
 
-    //Asign the text TextView to the text1 in the layout
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ConstraintLayout constraintLayout;
         private TextView nomMunicipiView;
@@ -36,13 +31,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public ViewHolder(View v) {
             super(v);
             constraintLayout = v.findViewById(R.id.constraintLayout);
-            nomMunicipiView = v.findViewById(R.id.nomMunicipi);
-            ineMunicipiView = v.findViewById(R.id.numeroIne);
+            nomMunicipiView = v.findViewById(R.id.municipiName);
+            ineMunicipiView = v.findViewById(R.id.ineName);
             escutMuncipi = v.findViewById(R.id.escutMunicipi);
         }
     }
 
-    //Constructor
     public RecyclerViewAdapter(Context context) {
         this.data = new ArrayList<>();
         this.context = context;
@@ -60,12 +54,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Element element = data.get(position);
         holder.ineMunicipiView.setText(element.getIne());
         holder.nomMunicipiView.setText(element.getMunicipiNom());
-
         Picasso.with(context).load(element.getMunicipiEscut()).into(holder.escutMuncipi);
     }
 
     @Override
-    public  int getItemCount() {
+    public int getItemCount() {
         return data.size();
     }
 }
